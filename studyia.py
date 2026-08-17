@@ -14,7 +14,7 @@ if st.button("Gerar"):
     if user_text:
         with st.spinner("Study IA está pensando..."):
             try:
-                url = "https://studyia-l3r7.onrender.com/analisar-texto"
+                url = "https://studyia-zpmr.onrender.com/analisar-texto"
                 dados = {"user_text": user_text}
 
                 resposta_api = requests.post(url, json=dados)
