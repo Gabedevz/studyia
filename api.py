@@ -11,7 +11,10 @@ class Pedidotexto(BaseModel):
     user_text: str
 
 @app.post("/analisar-texto")
-def analisar_texto(pedido: Pedidotexto):
+@app.get("/analisar-texto")
+def analisar_texto(pedido: Pedidotexto = None):
+    if pedido is None or not pedido.user_text:
+        return {"status": "online", "mensagem": "A API está funcionando! Envie um POST com o texto para analisar."
     instrucao = (
         "You are an expert academic tutor. Analyze the user's text and return your response strictly as a JSON object with these three keys: 'resumo', 'portugues', and 'ingles'. "
         "CRITICAL JSON RULE: Do NOT use raw unescaped line breaks inside the string values. If you need a line break, you must use the escape sequence '\\n' or keep the text continuous. "
