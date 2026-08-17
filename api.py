@@ -5,17 +5,23 @@ from groq import Groq
 
 app = FastAPI(title="Minha API de Estudos com Groq")
 
+# Dica de segurança: considere usar variáveis de ambiente no futuro 
+# em vez de deixar a chave exposta diretamente no código!
 client = Groq(api_key="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")
 
 class Pedidotexto(BaseModel):
     user_text: str
+
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "API rodando! Use o endpoint /analisar-texto"}
 
 @app.post("/analisar-texto")
 @app.get("/analisar-texto")
 def analisar_texto(pedido: Pedidotexto = None):
     if pedido is None or not pedido.user_text:
         return {"status": "online", "mensagem": "A API está funcionando! Envie um POST com o texto para analisar."}
-        
+    
     instrucao = (
         "You are an expert academic tutor. Analyze the user's text and return your response strictly as a JSON object with these three keys: 'resumo', 'portugues', and 'ingles'. "
         "CRITICAL JSON RULE: Do NOT use raw unescaped line breaks inside the string values. If you need a line break, you must use the escape sequence '\\n' or keep the text continuous. "
@@ -26,8 +32,13 @@ def analisar_texto(pedido: Pedidotexto = None):
     )
     
     try:
+        # Busca automaticamente o primeiro modelo disponível na sua conta
+        modelos_disponiveis = client.models.list()
+        # Filtramos modelos que suportam chat (chat-completions)
+        modelo_selecionado = [m.id for m in modelos_disponiveis.data if "chat" in m.id or "llama" in m.id or "mixtral" in m.id][0]
+        
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model=modelo_selecionado,
             messages=[
                 {"role": "system", "content": "You are a helpful academic assistant. Always output valid JSON with strict control characters handling."},
                 {"role": "user", "content": instrucao}
@@ -38,6 +49,7 @@ def analisar_texto(pedido: Pedidotexto = None):
         
         content_str = response.choices[0].message.content.strip()
         
+        # Limpeza básica do JSON
         if content_str.startswith("```json"):
             content_str = content_str[7:]
         if content_str.startswith("```"):
