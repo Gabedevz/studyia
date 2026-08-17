@@ -43,7 +43,7 @@ def analisar_texto(pedido: Pedidotexto = None):
                 {"role": "system", "content": "You are a helpful academic assistant. Always output valid JSON with strict control characters handling."},
                 {"role": "user", "content": instrucao}
             ],
-            max_tokens=4000,
+            max_tokens=512,
             temperature=0.3
         )
         
